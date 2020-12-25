@@ -1,8 +1,9 @@
 const admin = require('firebase-admin');
-const { v4: uuidv4 } = require('uuid');
+// const { v4: uuidv4 } = require('uuid');
 // files
-// const myJson = require('./postal_array.json');
-const citiesArr = require('./cities3.json');
+// const citiesArr = require('./cities3.json');
+const { makeRoompies } = require('./test2');
+let roompies = [];
 
 const serviceAccount = require('./serviceAccount.json');
 
@@ -14,42 +15,34 @@ admin.initializeApp({
 
 // const postals = myJson.postals; // postals arr => length 81248
 const db = admin.firestore();
-// const dummy = [
-//   {
-//     city: 'Balikpapan',
-//     code: 76111,
-//   },
-//   {
-//     city: 'Yogyakarta',
-//     code: 56222,
-//   },
-//   {
-//     city: 'Sleman',
-//     code: 85311,
-//   },
-// ];
 
-citiesArr.forEach(async (city, i) => {
+// add cities array to firestore
+// citiesArr.forEach(async (city, i) => {
+//   try {
+//     const docRef = db.collection('cities').doc(uuidv4());
+
+//     console.log(`Loop #${i} => Uploading doc: ${docRef.id}`);
+//     await docRef.set(city);
+//   } catch (err) {
+//     console.error(err);
+//   }
+// });
+
+async function seedRoompies() {
   try {
-    const docRef = db.collection('cities').doc(uuidv4());
+    const docRef = db.collection('roompies');
 
-    console.log(`Loop #${i} => Uploading doc: ${docRef.id}`);
-    await docRef.set(city);
+    // make roompies
+    await makeRoompies(10, roompies);
+
+    const rLength = roompies.length;
+    for (let i = 0; i < rLength; i++) {
+      const newR = await docRef.add(roompies[i]);
+      console.log(`Loop #${i} => Uploading doc: ${newR.id}`);
+    }
   } catch (err) {
     console.error(err);
   }
-});
+}
 
-// contoh add data to firestore
-// const docRef = db.collection('users').doc('my-unique-id');
-// await docRef.set({
-//   first: 'Tri',
-//   last: 'Rifandani',
-//   born: 1988,
-// });
-
-// contoh read data firestore
-// const snapshot = await db.collection('users').get();
-// snapshot.forEach((doc) => {
-//   console.log(doc.id, '=>', doc.data());
-// });
+seedRoompies();
